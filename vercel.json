@@ -1,0 +1,29 @@
+{
+  "headers": [
+    {
+      "source": "/(main|config).js",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    },
+    {
+      "source": "/index.html",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    }
+  ],
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://homeletter2-0-backend.onrender.com/api/$1" }
+  ],
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "homeletter2-0-frontend.vercel.app" }],
+      "destination": "https://frontend-jose6685-6249s-projects.vercel.app/$1",
+      "statusCode": 308
+    },
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "homeletter2-0-frontend-jose6685-6249s-projects.vercel.app" }],
+      "destination": "https://frontend-jose6685-6249s-projects.vercel.app/$1",
+      "statusCode": 308
+    }
+  ]
+}

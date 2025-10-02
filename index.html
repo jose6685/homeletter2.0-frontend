@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>天父的信</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Favicon -->
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="favicon.svg" />
+  <!-- Lottie Web CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+  <!-- Google Publisher Tag (GPT) for Rewarded / Anchor Ads -->
+  <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+  <!-- Google AdSense for bottom responsive banner (Option B) -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9507923681356448" crossorigin="anonymous"></script>
+</head>
+<body>
+  <!-- Layered background scene per PRD 5.2 -->
+  <div id="bgScene" class="scene" aria-hidden="true">
+    <div class="layer sky">
+      <div class="sun" aria-hidden="true"></div>
+      <div class="cloud c1"></div>
+      <div class="cloud c2"></div>
+      <div class="cloud c3"></div>
+      <div class="cloud c4"></div>
+      <div class="cloud c5"></div>
+    </div>
+    <div class="layer mid">
+      <!-- SVG 彩虹：橢圓弧線而非圓形 -->
+      <svg class="rainbow" viewBox="0 0 100 50" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M5,45 A45,35 0 0 1 95,45" stroke="red" />
+        <path d="M8,45 A42,33 0 0 1 92,45" stroke="orange" />
+        <path d="M11,45 A39,31 0 0 1 89,45" stroke="yellow" />
+        <path d="M14,45 A36,29 0 0 1 86,45" stroke="green" />
+        <path d="M17,45 A33,27 0 0 1 83,45" stroke="skyblue" />
+        <path d="M20,45 A30,25 0 0 1 80,45" stroke="blue" />
+        <path d="M23,45 A27,23 0 0 1 77,45" stroke="purple" />
+      </svg>
+      <!-- 遠方山脈（中景靠上位置） -->
+      <svg class="mountains" viewBox="0 0 100 50" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="mountainGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#cfe3f0" />
+            <stop offset="100%" stop-color="#9fb4c5" />
+          </linearGradient>
+        </defs>
+        <polygon points="5,45 18,20 30,45" class="peak" fill="url(#mountainGrad)" />
+        <polygon points="28,45 42,18 56,45" class="peak" fill="url(#mountainGrad)" />
+        <polygon points="52,45 68,22 82,45" class="peak" fill="url(#mountainGrad)" />
+        <polygon points="76,45 88,26 98,45" class="peak" fill="url(#mountainGrad)" />
+      </svg>
+      <!-- 彎曲 S 型河流（使用 SVG） -->
+      <svg class="river" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="riverGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#a8d8ff" />
+            <stop offset="60%" stop-color="#5fb8ff" />
+            <stop offset="100%" stop-color="#2ea0ff" />
+          </linearGradient>
+        </defs>
+        <path d="M0,70 C15,60 35,80 50,70 C65,60 85,80 100,70 L100,100 L0,100 Z" fill="url(#riverGrad)" />
+        <path d="M0,70 C15,60 35,80 50,70 C65,60 85,80 100,70" class="river-wave" />
+      </svg>
+      <div class="birds" aria-hidden="true"></div>
+    </div>
+    <div class="layer fg">
+      <div class="garden" aria-hidden="true">
+        <div class="sunflower f1"></div>
+        <div class="sunflower f2"></div>
+        <div class="sunflower f3"></div>
+        <div class="sunflower f4"></div>
+        <div class="sunflower f5"></div>
+        <div class="sunflower f6"></div>
+        <div class="sunflower f7"></div>
+        <div class="sunflower f8"></div>
+        <div class="sunflower f9"></div>
+        <div class="sunflower f10"></div>
+        <div class="sunflower f11"></div>
+        <div class="sunflower f12"></div>
+        <!-- 草叢：多個草葉，增加前景存在感 -->
+        <div class="grass g1"></div>
+        <div class="grass g2"></div>
+        <div class="grass g3"></div>
+        <div class="grass g4"></div>
+        <div class="grass g5"></div>
+        <div class="grass g6"></div>
+        <div class="grass g7"></div>
+        <div class="grass g8"></div>
+        <div class="grass g9"></div>
+        <div class="grass g10"></div>
+        <div class="grass g11"></div>
+        <div class="grass g12"></div>
+      </div>
+    </div>
+  </div>
+  <header class="app-header">
+    <h1>天父的信</h1>
+    <div class="marquee" aria-live="polite"><span id="timeMarquee"></span></div>
+    <button id="btnGoHomeTop" class="secondary" aria-label="回到首頁">回到首頁</button>
+  </header>
+
+  <!-- 今日免廣告提示（動態顯示） -->
+  <div id="adNotice" class="notice hidden" role="status" aria-live="polite"></div>
+
+  
+
+  <main class="layout">
+    <section class="card left">
+      <h2><span>隨機</span><br><span>(仰望神)</span></h2>
+      <button id="btnRandom" class="primary">抽一封</button>
+    </section>
+
+    <section class="card right">
+      <h2>選主題</h2>
+      <select id="topicSelect" aria-label="選擇主題"></select>
+      <button id="btnGenerate" class="primary">抽</button>
+    </section>
+  </main>
+
+  <section class="result">
+    <div id="loading" class="loading hidden">
+      <div id="lottieContainer" class="lottie-box" aria-label="米開朗基羅手指靠近動畫"></div>
+      <p>創造的觸摸正臨近…</p>
+    </div>
+    <article id="letter" class="letter">
+      <div class="letter-controls">
+        <div id="clock" class="clock" aria-label="現在時間"></div>
+        <button id="btnSpeakToggle" class="speak-toggle" aria-label="播放或暫停朗讀">播放</button>
+      </div>
+      <div id="letterContent" class="letter-content">
+        <div id="letterBody" class="letter-body">
+          <div id="smileHint" class="smile-hint">天父花園的來信要等15秒左右. 期待一下!</div>
+        </div>
+        <div class="letter-actions">
+          <button id="btnSave" class="secondary">保存卡片</button>
+          <button id="btnShare" class="secondary">分享</button>
+          <button id="btnShareLine" class="secondary">LINE 分享</button>
+          <button id="btnShareFacebook" class="secondary">Facebook 分享</button>
+          <button id="btnOpenMailbox" class="secondary">打開信箱</button>
+          <!-- Bottom static ad (AdSense Responsive Banner, Option B) -->
+          <div id="bottomAdBanner" style="margin-top:12px">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-9507923681356448"
+                 data-ad-slot="8178860305"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+          </div>
+        </div>
+      </div>
+      <div class="letter-sidebar">
+        
+        <div id="mailboxPopover" class="popover hidden" role="dialog" aria-modal="true" aria-labelledby="mailboxTitle">
+          <div class="popover-panel">
+            <div class="popover-header">
+              <h3 id="mailboxTitle">信箱</h3>
+              <div class="header-actions">
+                <button id="goHomeFromMailbox" class="secondary">回到首頁</button>
+                <button id="closePopover" class="icon-btn" aria-label="關閉">✖</button>
+              </div>
+            </div>
+            <ul id="mailboxList" class="mailbox-list"></ul>
+            <div id="mailboxFooter" class="popover-footer">
+              <button id="prevPage" class="secondary">上一頁</button>
+              <span id="pageIndicator" aria-live="polite"></span>
+              <button id="nextPage" class="secondary">下一頁</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  
+
+  <script src="config.js?v=3"></script>
+  <script src="main.js?v=12"></script>
+</body>
+</html>

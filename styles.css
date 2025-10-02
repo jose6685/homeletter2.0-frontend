@@ -1,0 +1,206 @@
+:root { --blue:#87CEEB; --green:#90EE90; --gold:#FFD700; --shadow:rgba(0,0,0,.08); --sidebar-width:200px; }
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,Segoe UI,Arial}
+.app-header{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;padding:48px 20px;background:transparent}
+.app-header h1{margin:0;color:var(--gold);text-shadow:0 2px 6px var(--shadow)}
+.app-header h1{font-size:4em}
+.mailbox-btn{display:none}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:10px}
+.card{padding:8px;border-radius:12px;background:rgba(255,255,255,0.4);backdrop-filter:none;box-shadow:0 4px 12px var(--shadow)}
+.card h2{margin-top:0;text-align:center;font-size:1.5rem;line-height:1.2}
+.primary{display:inline-block;padding:10px 16px;border:none;border-radius:8px;background:var(--blue);color:#003;cursor:pointer}
+.secondary{display:inline-block;padding:8px 14px;border:none;border-radius:8px;background:#f2f6ff;color:#003;cursor:pointer}
+.result{padding:0 20px 20px}
+.letter{white-space:pre-wrap;line-height:1.7;padding:16px;border-radius:12px;background:rgba(255,255,255,0);backdrop-filter:none;box-shadow:0 4px 12px var(--shadow);min-height:140px;display:flex;gap:12px;align-items:flex-start;position:relative}
+.letter-controls{position:absolute;top:12px;right:calc(var(--sidebar-width) + 24px);display:flex;align-items:center;gap:12px;z-index:10}
+.speak-toggle{position:static;z-index:auto;padding:13px 21px;border:none;border-radius:12px;background:#f2f6ff;color:#003;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.08);font-size:2.1rem}
+.letter-content{flex:1}
+.letter-body{white-space:pre-wrap}
+.letter-body .para{margin-bottom:0.6rem;line-height:1.7}
+.actions-list{margin-top:0.5rem;padding-left:1.2rem}
+.actions-list li{margin-bottom:0.25rem}
+.letter-actions{margin-top:12px;display:flex;gap:10px;background:rgba(255,255,255,0.4);padding:12px;border-radius:12px}
+.letter-sidebar{width:var(--sidebar-width);display:flex;flex-direction:column;align-items:center;gap:12px;position:relative}
+.meta{margin-top:8px;font-size:14px;color:#333}
+/* 與本文同欄顯示的附加資訊 */
+.meta-inline{margin-top:8px;font-size:14px;color:#333}
+.mailbox-meta{margin-top:6px;font-size:13px;color:#555}
+.footer{padding:12px 20px;color:#333;background:transparent;border-top:1px solid rgba(238,238,238,.6)}
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;margin-bottom:10px}
+.hidden{display:none}
+.notice{margin:0 20px 10px;padding:10px 12px;border-radius:10px;background:#fff8e1;color:#7a5c00;box-shadow:0 2px 8px rgba(0,0,0,.06);font-size:1rem;text-align:center}
+.lottie-box{width:min(420px,90vw);height:160px}
+.fab-mailbox{position:relative;z-index:1001;width:112px;height:112px;border:none;border-radius:22px;background:#e6f4ff;box-shadow:0 6px 16px rgba(0,0,0,.15);cursor:pointer;display:grid;place-items:center;font-size:44px}
+.popover{position:absolute;right:0;top:140px;width:min(360px,92vw);max-height:60vh;overflow:auto;background:rgba(255,255,255,0);backdrop-filter:none;border:1px solid rgba(238,238,238,.5);border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.18);z-index:1000}
+.letter-sidebar{position:relative}
+.popover-header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #eee}
+.icon-btn{border:none;background:transparent;font-size:18px;cursor:pointer}
+.mailbox-list{list-style:none;margin:0;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+.mailbox-list li{padding:8px 10px;border:1px solid #eee;border-radius:8px}
+.mailbox-list .preview{margin-top:4px;color:#444;font-size:0.92rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* 底部白框內的提示 */
+.smile-hint{color:#666;font-size:1rem;text-align:center}
+
+/* 回復主內容滿版寬度 */
+.layout, .result { margin-right: 0; }
+
+/* 時鐘樣式 */
+.clock {
+  font-variant-numeric: tabular-nums;
+  font-size: 1.1rem;
+  text-align: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+background: rgba(255,255,255,0);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  color: #333;
+}
+
+/* 覆蓋懸浮信箱與彈出框位置到面板內 */
+.right-panel .fab-mailbox {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+}
+.right-panel .popover {
+  position: absolute;
+  bottom: 72px;
+  right: 16px;
+  width: calc(100% - 32px);
+  max-height: 60vh;
+  overflow: auto;
+}
+
+.popover-footer{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-top:1px solid #eee;background:#fff}
+
+/* 全螢幕覆蓋的信箱視窗 */
+.popover.fullscreen{position:fixed !important;top:0 !important;right:0 !important;bottom:0 !important;left:0 !important;width:100vw !important;height:100vh !important;background:rgba(0,0,0,0.4);z-index:2000;display:flex;justify-content:center;align-items:flex-start;padding:24px;box-sizing:border-box}
+.popover-panel{width:min(820px,96vw);max-height:calc(100vh - 48px);overflow:hidden;background:rgba(255,255,255,0);backdrop-filter:none;border:1px solid rgba(238,238,238,.45);border-radius:12px;box-shadow:0 12px 28px rgba(0,0,0,.22);display:flex;flex-direction:column}
+.popover-panel .mailbox-list{flex:1 1 auto;overflow:auto}
+.popover-panel .popover-footer{position:static}
+
+/* hidden 必須優先於 fullscreen 顯示，避免載入時誤顯示 */
+.popover.fullscreen.hidden{display:none !important}
+
+/* Header actions container for popover */
+.header-actions{display:flex;gap:.5rem;align-items:center}
+
+/* Top header home button alignment */
+.app-header{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center}
+
+/* 放大並內縮頂部「回到首頁」按鈕 */
+#btnGoHomeTop{font-size:2.1rem;padding:17px 26px;border-radius:12px;margin-right:24px}
+
+/* 信箱彈窗的「回到首頁」按鈕放大 */
+#goHomeFromMailbox{font-size:2rem;padding:18px 28px;border-radius:16px}
+
+/* 頂部跑馬燈樣式（放大三倍，水平滾動） */
+.marquee{overflow:hidden;white-space:nowrap;color:#003}
+.marquee{font-size:3rem;line-height:1.2}
+.marquee span{display:inline-block;padding-left:100%;will-change:transform;animation:marqueeScroll 20s linear infinite}
+@keyframes marqueeScroll{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+
+/* 置中並放大主要抽卡按鈕（隨機 / 選主題） */
+#btnRandom, #btnGenerate{
+  display:block;
+  margin:16px auto;
+  font-size:1.1rem; /* 縮小為原來的一半 */
+  padding:12px 18px;
+  border-radius:12px;
+}
+/* 置中選單以搭配放大的抽卡鍵 */
+#topicSelect{
+  display:block;
+  margin:0 auto;
+  font-size:0.6rem; /* 縮小為原來的一半 */
+  padding:5px 6px;
+}
+
+@media (max-width: 768px) {
+  :root{--sidebar-width:160px}
+}
+
+/* --- PRD 5.2 Layered Background Scene --- */
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.scene .layer{position:absolute;inset:0;will-change:transform}
+/* Sky */
+.scene .layer.sky{background:linear-gradient(180deg,#bfe8ff 0%,#e7f8ff 40%,#ffffff 100%)}
+.scene .sun{position:absolute;top:6%;right:12%;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle at 40% 40%,#FFD700 0%,#FFA500 60%,rgba(255,200,0,0) 70%);filter:blur(0.6px);opacity:.9;animation:sunPulse 8s ease-in-out infinite}
+@keyframes sunPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.scene .cloud{position:absolute;background:#fff;border-radius:28px;box-shadow:0 8px 20px rgba(0,0,0,.08);opacity:.9}
+.scene .cloud::before,.scene .cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
+.scene .cloud::before{width:48px;height:48px;left:10px;top:-16px}
+.scene .cloud::after{width:60px;height:60px;left:56px;top:-26px}
+.scene .cloud{width:120px;height:60px}
+.scene .cloud.c1{top:8%;left:-20%;animation:cloudDrift 120s linear infinite}
+.scene .cloud.c2{top:16%;left:10%;animation:cloudDrift 150s linear infinite}
+.scene .cloud.c3{top:22%;left:-10%;animation:cloudDrift 180s linear infinite}
+.scene .cloud.c4{top:10%;left:40%;animation:cloudDrift 140s linear infinite}
+.scene .cloud.c5{top:18%;left:70%;animation:cloudDrift 160s linear infinite}
+@keyframes cloudDrift{0%{transform:translateX(0)}100%{transform:translateX(60vw)}}
+
+/* Midground */
+.scene .layer.mid{pointer-events:none}
+/* SVG 彩虹位置與樣式（橢圓弧線） */
+.scene .rainbow{position:absolute;top:25%;left:0%;width:100vw;height:30vh;opacity:.55}
+.scene .rainbow path{fill:none;stroke-width:6;stroke-linecap:round}
+.scene .river{position:absolute;bottom:24%;left:0;width:100vw;height:26vh;opacity:.75;box-shadow:0 6px 18px rgba(0,0,0,.12);animation:riverShimmer 12s linear infinite}
+.scene .river .river-wave{fill:none;stroke:#eaf7ff;stroke-width:1.2;opacity:.7}
+/* 遠方山脈（中景靠上位置） */
+.scene .mountains{position:absolute;top:48%;left:0;width:100vw;height:20vh;opacity:.35}
+.scene .mountains .peak{stroke:#8fa3b5;stroke-width:.6}
+@keyframes riverShimmer{0%{filter:brightness(100%)}50%{filter:brightness(110%)}100%{filter:brightness(100%)}}
+.scene .birds{position:absolute;inset:0}
+.scene .bird{position:absolute;left:-10%;top:var(--top,50%);font-size:22px;opacity:.9;animation:birdFly var(--fly-dur,24s) linear infinite;animation-delay:var(--fly-delay,0s)}
+@keyframes birdFly{0%{transform:translateX(0)}100%{transform:translateX(120vw)}}
+
+/* Foreground */
+.scene .layer.fg{pointer-events:none}
+.scene .garden{position:absolute;left:0;right:0;bottom:0;height:34vh;background:linear-gradient(180deg,rgba(120,200,120,.15),rgba(120,200,120,.35))}
+ /* 向日葵（中心+花瓣圈），莖高度 x3 */
+.scene .sunflower{position:absolute;bottom:90px;width:48px;height:48px;border-radius:50%;
+   background:
+     radial-gradient(circle at 50% 50%, #6b3f1f 0 10px, transparent 11px),
+     radial-gradient(circle at 50% 50%, #f7cf3a 12px 18px, transparent 19px);
+   box-shadow:0 4px 10px rgba(0,0,0,.12)}
+.scene .sunflower::before{content:"";position:absolute;inset:-8px;border-radius:50%;
+   background:conic-gradient(#ffd84a 0 15deg,#ffcd2e 15deg 30deg,#ffd84a 30deg 45deg,#ffcd2e 45deg 60deg,
+   #ffd84a 60deg 75deg,#ffcd2e 75deg 90deg,#ffd84a 90deg 105deg,#ffcd2e 105deg 120deg,
+   #ffd84a 120deg 135deg,#ffcd2e 135deg 150deg,#ffd84a 150deg 165deg,#ffcd2e 165deg 180deg,
+   #ffd84a 180deg 195deg,#ffcd2e 195deg 210deg,#ffd84a 210deg 225deg,#ffcd2e 225deg 240deg,
+   #ffd84a 240deg 255deg,#ffcd2e 255deg 270deg,#ffd84a 270deg 285deg,#ffcd2e 285deg 300deg,
+   #ffd84a 300deg 315deg,#ffcd2e 315deg 330deg,#ffd84a 330deg 345deg,#ffcd2e 345deg 360deg);
+   mask:radial-gradient(circle at 50% 50%, transparent 0 12px, #000 13px 22px, transparent 23px)}
+.scene .sunflower::after{content:"";position:absolute;bottom:-90px;left:23px;width:4px;height:90px;background:#3a7f3a;border-radius:2px}
+.scene .sunflower.f1{left:6%}.scene .sunflower.f2{left:18%}.scene .sunflower.f3{left:30%}.scene .sunflower.f4{left:46%}.scene .sunflower.f5{left:64%}.scene .sunflower.f6{left:82%}
+.scene .sunflower.f7{left:12%}.scene .sunflower.f8{left:24%}.scene .sunflower.f9{left:36%}.scene .sunflower.f10{left:52%}.scene .sunflower.f11{left:74%}.scene .sunflower.f12{left:88%}
+/* 草葉（前景可見度提升） */
+.scene .grass{position:absolute;bottom:6px;width:3px;height:66px;background:#3a7f3a;border-radius:2px;transform-origin:bottom center;animation:grassSway 5s ease-in-out infinite alternate;opacity:.9}
+.scene .grass.g1{left:4%}.scene .grass.g2{left:10%}.scene .grass.g3{left:16%}.scene .grass.g4{left:22%}.scene .grass.g5{left:28%}.scene .grass.g6{left:36%}
+.scene .grass.g7{left:44%}.scene .grass.g8{left:52%}.scene .grass.g9{left:60%}.scene .grass.g10{left:68%}.scene .grass.g11{left:76%}.scene .grass.g12{left:84%}
+@keyframes grassSway{0%{transform:rotate(-2deg)}100%{transform:rotate(2deg)}}
+
+/* --- UI shrink overrides to reveal more background --- */
+:root { --sidebar-width:140px; }
+.result{padding:0 10px 10px}
+.letter{padding:8px;min-height:100px;gap:8px}
+.letter-controls{right:calc(var(--sidebar-width) + 16px);gap:10px}
+.speak-toggle{padding:10px 16px;font-size:1.6rem}
+.letter-actions{margin-top:8px;gap:6px}
+.letter-actions .secondary{font-size:0.85rem;padding:6px 10px;border-radius:10px}
+@media (max-width: 768px) { :root{--sidebar-width:120px} }
+.popover-panel{width:min(720px,90vw)}
+
+/* --- 進一步縮小首頁卡片框 --- */
+.layout{padding:8px;gap:60px;max-width:60%;margin:0 auto}
+.card{padding:12px;border-radius:8px}
+.card h2{font-size:1.4rem;margin-bottom:12px}
+#btnRandom, #btnGenerate{
+  font-size:1.1rem;
+  padding:12px 18px;
+  margin:12px auto;
+  border-radius:8px;
+}
+#topicSelect{
+  font-size:0.8rem;
+  padding:6px 8px;
+}
