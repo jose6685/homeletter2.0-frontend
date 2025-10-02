@@ -82,15 +82,15 @@ function setNotice(msg){
   }
 }
 
-// GPT Rewarded 初始化與播放
+// GPT Rewarded 初始化與播放（修正 API 調用，使用 OutOfPageSlot REWARDED）
 let gptInitialized = false;
 function initGPT(){
   return new Promise((resolve)=>{
     window.googletag = window.googletag || { cmd: [] };
     googletag.cmd.push(function(){
       if (!gptInitialized){
-        googletag.pubads().enableSingleRequest();
-        googletag.enableServices();
+        try { googletag.pubads().enableSingleRequest(); } catch{}
+        try { googletag.enableServices(); } catch{}
         gptInitialized = true;
       }
       resolve();
@@ -105,11 +105,23 @@ function playRewardedAd(){
     let granted = false;
     await initGPT();
     googletag.cmd.push(function(){
-      const adUnit = (window.GPT_REWARDED_AD_UNIT || '/21800000000/homeletter_rewarded');
-      const slot = googletag.rewardedSlot(adUnit);
-      googletag.pubads().addEventListener('rewardedSlotGranted', function(){ granted = true; });
-      googletag.pubads().addEventListener('rewardedSlotClosed', function(){ resolve(granted); });
-      googletag.pubads().addEventListener('rewardedSlotReady', function(event){ try{ event.makeRewardedVisible(); }catch{} });
+      try {
+        const adUnit = (window.GPT_REWARDED_AD_UNIT || '/21800000000/homeletter_rewarded');
+        const slot = googletag.defineOutOfPageSlot(
+          adUnit,
+          googletag.enums.OutOfPageFormat.REWARDED
+        );
+        if (!slot) { resolve(false); return; }
+        slot.addService(googletag.pubads());
+        googletag.pubads().addEventListener('rewardedSlotGranted', function(){ granted = true; });
+        googletag.pubads().addEventListener('rewardedSlotClosed', function(){ resolve(granted); });
+        googletag.pubads().addEventListener('rewardedSlotReady', function(event){
+          try { googletag.pubads().showRewarded(slot); } catch{}
+        });
+      } catch (e) {
+        console.error('GPT Rewarded 初始化失敗：', e);
+        resolve(false);
+      }
     });
   });
 }
