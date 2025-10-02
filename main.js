@@ -132,9 +132,9 @@ function initBottomBanner(){
   } catch{}
 }
 
-// 部署支援：在 Vercel 前端 / Render 後端環境下設定 API 基底
-const API_BASE = (window.API_BASE || ((location.port === '8000') ? 'http://localhost:3000' : 'https://homeletter2-0-backend.onrender.com'));
-// 讓 Console 檢視更直觀：若未由 config.js 設定，將計算值暴露到 window
+// 部署策略：固定使用後端 API_BASE（由 config.js 提供），不再依賴前端域名下的 /api 重寫
+const API_BASE = window.API_BASE;
+// 讓 Console 檢視更直觀：保留到 window（與既有行為相容）
 if (!window.API_BASE) { window.API_BASE = API_BASE; }
 function apiFetch(path, options){
   const url = (API_BASE && path.startsWith('/')) ? (API_BASE + path) : path;
@@ -291,9 +291,22 @@ async function generate(topic){
   try {
     const res = await apiFetch("/api/generate",{
       method:"POST",
-      headers:{"Content-Type":"application/json"},
+      headers:{"Content-Type":"application/json","Accept":"application/json"},
       body: JSON.stringify({ topic })
     });
+    const ct = (res.headers && res.headers.get && res.headers.get('content-type')) || '';
+    if (!res.ok) {
+      let text = '';
+      try { text = await res.text(); } catch {}
+      console.error('生成 API 失敗：', res.status, text || '(無文字)');
+      throw new Error('生成 API 回應非 2xx，狀態碼 ' + res.status);
+    }
+    if (ct && ct.indexOf('application/json') === -1) {
+      let text = '';
+      try { text = await res.text(); } catch {}
+      console.error('生成 API 內容型別非 JSON：', ct, text.slice(0,200));
+      throw new Error('生成 API 回傳非 JSON 格式');
+    }
     const json = await res.json();
     const data = json.data || {}; // 盡量使用後端解析的 JSON
     const text = sanitizeText(data["完整信件"] || data.letter || "(未取得內容)");
@@ -355,8 +368,21 @@ async function fetchGeneratedItem(topic){
   showLoading(true);
   try{
     const res = await apiFetch('/api/generate',{
-      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ topic })
+      method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body: JSON.stringify({ topic })
     });
+    const ct = (res.headers && res.headers.get && res.headers.get('content-type')) || '';
+    if (!res.ok) {
+      let text = '';
+      try { text = await res.text(); } catch {}
+      console.error('生成 API 失敗：', res.status, text || '(無文字)');
+      throw new Error('生成 API 回應非 2xx，狀態碼 ' + res.status);
+    }
+    if (ct && ct.indexOf('application/json') === -1) {
+      let text = '';
+      try { text = await res.text(); } catch {}
+      console.error('生成 API 內容型別非 JSON：', ct, text.slice(0,200));
+      throw new Error('生成 API 回傳非 JSON 格式');
+    }
     const json = await res.json();
     const data = json.data || {};
     const text = sanitizeText(data["完整信件"] || data.letter || "(未取得內容)");

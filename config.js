@@ -13,6 +13,6 @@ window.GPT_REWARDED_AD_UNIT = window.GPT_REWARDED_AD_UNIT || '/21800000000/homel
 window.ADSENSE_CLIENT = window.ADSENSE_CLIENT || 'ca-pub-9507923681356448';
 window.ADSENSE_SLOT = window.ADSENSE_SLOT || '8178860305';
 
-// SAFE MODE：預覽時避免觸發任何付費 API/廣告請求。
-// 正式環境請改為 false 或移除此設定。
-window.SAFE_MODE = (typeof window.SAFE_MODE !== 'undefined') ? window.SAFE_MODE : true;
+// SAFE MODE：正式部署改為關閉，避免使用相對路徑造成誤呼叫前端域名下的 /api。
+// 若需本地預覽安全模式，請改用 config.safe.js 與批次檔切換。
+window.SAFE_MODE = false;
