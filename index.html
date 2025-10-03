@@ -11,7 +11,8 @@
   <!-- Web App Manifest for TWA/PWA -->
   <link rel="manifest" href="manifest.json" />
   <!-- Lottie Web CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+  <!-- 已移除 Lottie CDN：避免因外網阻斷造成載入錯誤
+       若需動畫，請改用本地檔案（例如 frontend/lib/lottie.min.js），或在部署環境允許 CDN 後再開啟。 -->
   <!-- 已移除：廣告相關腳本（GPT / AdSense） -->
 </head>
 <body>
@@ -173,7 +174,7 @@
 
   
 
-  <script src="config.js?v=3"></script>
-  <script src="main.js?v=13"></script>
+  <script src="config.live.js?v=4"></script>
+  <script src="main.js?v=14"></script>
 </body>
 </html>

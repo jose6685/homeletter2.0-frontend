@@ -141,7 +141,44 @@ function apiFetch(path, options){
     }
     return Promise.resolve({ json: async ()=> ({ ok:true }) });
   }
-  return fetch(url, options);
+  const { timeoutMs = 20000, ...rest } = options || {};
+  const controller = new AbortController();
+  const timer = setTimeout(()=> controller.abort(new Error('timeout')), timeoutMs);
+  return fetch(url, { ...rest, signal: controller.signal })
+    .finally(()=> clearTimeout(timer));
+}
+
+// 具備逾時與指數退避的重試包裝
+function sleep(ms){ return new Promise(r=> setTimeout(r, ms)); }
+async function fetchWithRetry(path, options, retryOptions){
+  const {
+    maxRetries = 2,
+    initialDelayMs = 1000,
+    backoff = 2,
+    timeoutMs = 15000,
+    onAttempt
+  } = retryOptions || {};
+
+  let attempt = 0;
+  let delay = initialDelayMs;
+  while (true) {
+    attempt += 1;
+    try {
+      if (typeof onAttempt === 'function') {
+        try { onAttempt(attempt); } catch{}
+      }
+      const res = await apiFetch(path, { ...(options||{}), timeoutMs });
+      return res;
+    } catch (err) {
+      const isAbort = err && (err.name === 'AbortError' || err.message === 'timeout');
+      const isNetwork = err && (err.name === 'TypeError' || err.code === 'ECONNRESET');
+      if (attempt > maxRetries || (!isAbort && !isNetwork)) {
+        throw err;
+      }
+      await sleep(delay);
+      delay = Math.min(delay * backoff, 8000);
+    }
+  }
 }
 
 // 初始化主題
@@ -263,10 +300,16 @@ async function generate(topic){
     if (oldMeta) oldMeta.remove();
   }
   try {
-    const res = await apiFetch("/api/generate",{
+    const res = await fetchWithRetry("/api/generate",{
       method:"POST",
       headers:{"Content-Type":"application/json","Accept":"application/json"},
       body: JSON.stringify({ topic })
+    },{
+      maxRetries: 2,
+      initialDelayMs: 1000,
+      backoff: 2,
+      timeoutMs: 15000,
+      onAttempt: (n)=> setNotice(n===1 ? '正在喚醒服務…' : `正在喚醒服務…（第 ${n} 次重試）`)
     });
     const ct = (res.headers && res.headers.get && res.headers.get('content-type')) || '';
     if (!res.ok) {
@@ -334,15 +377,21 @@ async function generate(topic){
   } catch (e) {
     if (letterContentEl) { letterContentEl.textContent = "抱歉，生成時發生錯誤，稍後再試。"; }
     console.error(e);
-  } finally { showLoading(false); }
+  } finally { showLoading(false); setNotice(''); }
 }
 
 // 僅取得生成資料，不立即渲染（用於 Rewarded 門檻）
 async function fetchGeneratedItem(topic){
   showLoading(true);
   try{
-    const res = await apiFetch('/api/generate',{
+    const res = await fetchWithRetry('/api/generate',{
       method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body: JSON.stringify({ topic })
+    },{
+      maxRetries: 2,
+      initialDelayMs: 1000,
+      backoff: 2,
+      timeoutMs: 15000,
+      onAttempt: (n)=> setNotice(n===1 ? '正在喚醒服務…' : `正在喚醒服務…（第 ${n} 次重試）`)
     });
     const ct = (res.headers && res.headers.get && res.headers.get('content-type')) || '';
     if (!res.ok) {
