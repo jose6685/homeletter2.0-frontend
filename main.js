@@ -102,25 +102,87 @@ function playRewardedAd(){
   return new Promise(async (resolve)=>{
     // SAFE MODE：不觸發實際廣告，直接授予獎勵
     if (window.SAFE_MODE) { resolve(true); return; }
+
+    // 若是從原生 Rewarded 返回（TWA Activity 會帶上 ?rewarded=1），授予獎勵並清理參數
+    try {
+      const usp = new URLSearchParams(location.search || '');
+      const fromNative = usp.get('rewarded');
+      if (fromNative === '1') {
+        try {
+          const url = new URL(location.href);
+          url.searchParams.delete('rewarded');
+          history.replaceState(null, document.title, url.toString());
+        } catch {}
+        resolve(true);
+        return;
+      }
+    } catch {}
+
     let granted = false;
+    let done = false;
+    const TIMEOUT_MS = 12000; // 逾時保護，避免卡住
+    let slotRef = null;
+
+    // ANDROID：先嘗試喚起原生 Rewarded（homeletter://rewarded），若 1.2 秒內未離開則回退到 GPT
+    const isAndroid = /Android/i.test(navigator.userAgent || '');
+    if (isAndroid) {
+      try {
+        const intentUrl = 'intent://rewarded#Intent;scheme=homeletter;package=org.homeletter.app;end';
+        // 以導向方式觸發，若 App 未能處理則會留在原頁面
+        window.location.href = intentUrl;
+      } catch {}
+      // 短暫等待，若仍在頁面則回退到 GPT
+      await new Promise(r => setTimeout(r, 1200));
+      // 若使用者已離開去看原生廣告，這段不會執行；否則繼續走 GPT 流程
+    }
+
     await initGPT();
     googletag.cmd.push(function(){
+      let timeoutId = null;
+      const cleanupAndResolve = (ok)=>{
+        if (done) return; done = true;
+        if (timeoutId) { try { clearTimeout(timeoutId); } catch{} }
+        try {
+          if (slotRef) { googletag.destroySlots([slotRef]); }
+        } catch{}
+        resolve(!!ok);
+      };
+
       try {
         const adUnit = (window.GPT_REWARDED_AD_UNIT || '/21800000000/homeletter_rewarded');
         const slot = googletag.defineOutOfPageSlot(
           adUnit,
           googletag.enums.OutOfPageFormat.REWARDED
         );
-        if (!slot) { resolve(false); return; }
+        if (!slot) { console.warn('GPT Rewarded 未建立 slot'); cleanupAndResolve(false); return; }
+        slotRef = slot;
         slot.addService(googletag.pubads());
-        googletag.pubads().addEventListener('rewardedSlotGranted', function(){ granted = true; });
-        googletag.pubads().addEventListener('rewardedSlotClosed', function(){ resolve(granted); });
-        googletag.pubads().addEventListener('rewardedSlotReady', function(event){
-          try { googletag.pubads().showRewarded(slot); } catch{}
+
+        // 設置逾時：若事件未到達，回傳失敗避免流程卡住
+        timeoutId = setTimeout(()=>{
+          console.warn('GPT Rewarded 逾時未顯示，回傳失敗');
+          cleanupAndResolve(false);
+        }, TIMEOUT_MS);
+
+        // 事件監聽
+        googletag.pubads().addEventListener('rewardedSlotGranted', function(){
+          granted = true;
+          console.debug('GPT Rewarded: granted');
         });
+        googletag.pubads().addEventListener('rewardedSlotClosed', function(){
+          console.debug('GPT Rewarded: closed, granted =', granted);
+          cleanupAndResolve(granted);
+        });
+        googletag.pubads().addEventListener('rewardedSlotReady', function(event){
+          try {
+            console.debug('GPT Rewarded: ready, show');
+            googletag.pubads().showRewarded(slot);
+          } catch(e){ console.error('GPT Rewarded 顯示失敗：', e); }
+        });
+
       } catch (e) {
         console.error('GPT Rewarded 初始化失敗：', e);
-        resolve(false);
+        cleanupAndResolve(false);
       }
     });
   });
@@ -138,7 +200,17 @@ function initBottomBanner(){
         if (slot) ins.setAttribute('data-ad-slot', slot);
       }
       if (window.adsbygoogle) {
-        (adsbygoogle = window.adsbygoogle || []).push({});
+        try {
+          (adsbygoogle = window.adsbygoogle || []).push({});
+          console.debug('AdSense banner push');
+        } catch(e) {
+          console.warn('AdSense push 異常：', e);
+        }
+      } else {
+        console.warn('AdSense 物件未載入，稍後再試');
+        setTimeout(()=>{
+          try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch{}
+        }, 3000);
       }
     }
   } catch{}
@@ -636,7 +708,19 @@ function startSpeak(){
 function toggleSpeak(){
   const synth = window.speechSynthesis;
   if(!synth){ alert('此瀏覽器不支援語音朗讀'); return; }
-  if(synth.speaking && !synth.paused){ try { synth.pause(); } catch{} updateSpeakButton(); return; }
+  // Android 修正：若目前是暫停狀態，優先恢復而非重啟
+  if (synth.paused) {
+    try { synth.resume(); } catch{}
+    // 若恢復失敗，短暫延遲後重啟朗讀
+    setTimeout(()=>{
+      if (synth.paused || !synth.speaking) { startSpeak(); }
+    }, 600);
+    updateSpeakButton();
+    return;
+  }
+  // 正在說話且未暫停 → 暫停
+  if (synth.speaking && !synth.paused){ try { synth.pause(); } catch{} updateSpeakButton(); return; }
+  // 其餘情況 → 開始朗讀
   startSpeak();
 }
 function updateSpeakButton(){
