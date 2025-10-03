@@ -99,141 +99,12 @@ function initGPT(){
 }
 
 function playRewardedAd(){
-  return new Promise(async (resolve)=>{
-    // SAFE MODE：不觸發實際廣告，直接授予獎勵
-    if (window.SAFE_MODE) { console.warn('SAFE_MODE=true：略過廣告，直接授予'); resolve(true); return; }
-
-    // 若是從原生 Rewarded 返回（TWA Activity 會帶上 ?rewarded=1），授予獎勵並清理參數
-    try {
-      const usp = new URLSearchParams(location.search || '');
-      const fromNative = usp.get('rewarded');
-      if (fromNative === '1') {
-        try {
-          const url = new URL(location.href);
-          url.searchParams.delete('rewarded');
-          history.replaceState(null, document.title, url.toString());
-        } catch {}
-        resolve(true);
-        return;
-      }
-    } catch {}
-
-    let granted = false;
-    let done = false;
-    const TIMEOUT_MS = 12000; // 逾時保護，避免卡住
-    let slotRef = null;
-
-    // ANDROID：先嘗試喚起原生 Rewarded（homeletter://rewarded），若短時間內未離開則回退到 GPT
-    const isAndroid = /Android/i.test(navigator.userAgent || '');
-    if (isAndroid) {
-      try {
-        const intentUrl = 'intent://rewarded#Intent;scheme=homeletter;package=org.homeletter.app;end';
-        // 以導向方式觸發，若 App 未能處理則會留在原頁面
-        console.debug('嘗試喚起原生 Rewarded via intent');
-        window.location.href = intentUrl;
-      } catch {}
-      // 監聽可見性：若頁面在短時間變為 hidden，代表已切至原生
-      let leftPage = false;
-      const onVis = ()=>{
-        if (document.visibilityState === 'hidden') { leftPage = true; }
-      };
-      document.addEventListener('visibilitychange', onVis, { once: true });
-      // 最多等待 1800ms，盡量讓 TWA 有時間切換
-      await new Promise(r => setTimeout(r, 1800));
-      document.removeEventListener('visibilitychange', onVis);
-      if (leftPage) { console.debug('已離開至原生 Rewarded'); /* 回原生流程 */ }
-      else { console.debug('仍留在頁面，回退到 GPT Rewarded'); }
-      // 若使用者已離開去看原生廣告，這段不會執行；否則繼續走 GPT 流程
-    }
-
-    await initGPT();
-    googletag.cmd.push(function(){
-      let timeoutId = null;
-      const cleanupAndResolve = (ok)=>{
-        if (done) return; done = true;
-        if (timeoutId) { try { clearTimeout(timeoutId); } catch{} }
-        try {
-          if (slotRef) { googletag.destroySlots([slotRef]); }
-        } catch{}
-        resolve(!!ok);
-      };
-
-      try {
-        const adUnitDefault = '/21800000000/homeletter_rewarded';
-        const adUnit = (window.GPT_REWARDED_AD_UNIT || adUnitDefault);
-        if (adUnit === adUnitDefault) {
-          console.warn('GPT Rewarded 使用預設路徑，請在 config.js 設定正式 AD_UNIT');
-        }
-        const slot = googletag.defineOutOfPageSlot(
-          adUnit,
-          googletag.enums.OutOfPageFormat.REWARDED
-        );
-        if (!slot) { console.warn('GPT Rewarded 未建立 slot'); cleanupAndResolve(false); return; }
-        slotRef = slot;
-        slot.addService(googletag.pubads());
-
-        // 設置逾時：若事件未到達，回傳失敗避免流程卡住
-        timeoutId = setTimeout(()=>{
-          console.warn('GPT Rewarded 逾時未顯示，回傳失敗');
-          cleanupAndResolve(false);
-        }, TIMEOUT_MS);
-
-        // 事件監聽
-        googletag.pubads().addEventListener('rewardedSlotGranted', function(){
-          granted = true;
-          console.debug('GPT Rewarded: granted');
-        });
-        googletag.pubads().addEventListener('rewardedSlotClosed', function(){
-          console.debug('GPT Rewarded: closed, granted =', granted);
-          cleanupAndResolve(granted);
-        });
-        googletag.pubads().addEventListener('rewardedSlotReady', function(event){
-          try {
-            console.debug('GPT Rewarded: ready, show');
-            googletag.pubads().showRewarded(slot);
-          } catch(e){ console.error('GPT Rewarded 顯示失敗：', e); }
-        });
-
-      } catch (e) {
-        console.error('GPT Rewarded 初始化失敗：', e);
-        cleanupAndResolve(false);
-      }
-    });
-  });
+  // 廣告與獎勵規則已取消：直接授予，無任何廣告流程
+  return Promise.resolve(true);
 }
 
 // AdSense 底部橫幅初始化（Option B）
-function initBottomBanner(){
-  try {
-    if (bottomAdBanner && !window.SAFE_MODE) {
-      const ins = bottomAdBanner.querySelector('ins.adsbygoogle');
-      if (ins) {
-        const client = window.ADSENSE_CLIENT || ins.getAttribute('data-ad-client');
-        const slot = window.ADSENSE_SLOT || ins.getAttribute('data-ad-slot');
-        if (client) ins.setAttribute('data-ad-client', client);
-        if (slot) ins.setAttribute('data-ad-slot', slot);
-        // 若啟用 AdSense 測試模式，強制顯示測試廣告（不計入收益）
-        if (window.ADSENSE_TEST_MODE) {
-          try { ins.setAttribute('data-adtest', 'on'); } catch{}
-          console.debug('AdSense test mode: data-adtest=on');
-        }
-      }
-      if (window.adsbygoogle) {
-        try {
-          (adsbygoogle = window.adsbygoogle || []).push({});
-          console.debug('AdSense banner push');
-        } catch(e) {
-          console.warn('AdSense push 異常：', e);
-        }
-      } else {
-        console.warn('AdSense 物件未載入，稍後再試');
-        setTimeout(()=>{
-          try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch{}
-        }, 3000);
-      }
-    }
-  } catch{}
-}
+// 已移除：AdSense 底部橫幅初始化
 
 // 部署策略：固定使用後端 API_BASE（由 config.js 提供），不再依賴前端域名下的 /api 重寫
 const API_BASE = window.API_BASE;
@@ -499,28 +370,13 @@ async function fetchGeneratedItem(topic){
   }
 }
 
-// 抽卡嘗試：每日各一次免廣告；其餘需 Rewarded；同步並行 AI 與廣告
+// 抽卡：已取消廣告與獎勵門檻，直接生成並顯示
 async function attemptDraw(type, topic){
-  const freeAvailable = isFreeToday(type);
-  const needReward = !freeAvailable;
-  const aiPromise = fetchGeneratedItem(topic);
-  let rewardOk = true;
-  if (needReward){
-    setNotice('今日免廣告次數已用盡，需觀看廣告才能抽卡');
-    rewardOk = await playRewardedAd();
-  } else {
-    setNotice('');
-  }
-  const item = await aiPromise;
+  const item = await fetchGeneratedItem(topic);
   showLoading(false);
-  if (rewardOk){
-    displayCard(item);
-    setNotice('');
-    if (freeAvailable) { consumeFree(type); }
-    incDrawCount(type);
-  } else {
-    setNotice('完成觀看即可抽卡');
-  }
+  displayCard(item);
+  setNotice('');
+  incDrawCount(type);
 }
 
 // 信箱本地儲存
@@ -861,4 +717,4 @@ function initBackground(){
 
 // 啟動背景場景
 initBackground();
-initBottomBanner();
+// 已移除：底部橫幅初始化呼叫
