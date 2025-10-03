@@ -101,7 +101,7 @@ function initGPT(){
 function playRewardedAd(){
   return new Promise(async (resolve)=>{
     // SAFE MODE：不觸發實際廣告，直接授予獎勵
-    if (window.SAFE_MODE) { resolve(true); return; }
+    if (window.SAFE_MODE) { console.warn('SAFE_MODE=true：略過廣告，直接授予'); resolve(true); return; }
 
     // 若是從原生 Rewarded 返回（TWA Activity 會帶上 ?rewarded=1），授予獎勵並清理參數
     try {
@@ -123,16 +123,26 @@ function playRewardedAd(){
     const TIMEOUT_MS = 12000; // 逾時保護，避免卡住
     let slotRef = null;
 
-    // ANDROID：先嘗試喚起原生 Rewarded（homeletter://rewarded），若 1.2 秒內未離開則回退到 GPT
+    // ANDROID：先嘗試喚起原生 Rewarded（homeletter://rewarded），若短時間內未離開則回退到 GPT
     const isAndroid = /Android/i.test(navigator.userAgent || '');
     if (isAndroid) {
       try {
         const intentUrl = 'intent://rewarded#Intent;scheme=homeletter;package=org.homeletter.app;end';
         // 以導向方式觸發，若 App 未能處理則會留在原頁面
+        console.debug('嘗試喚起原生 Rewarded via intent');
         window.location.href = intentUrl;
       } catch {}
-      // 短暫等待，若仍在頁面則回退到 GPT
-      await new Promise(r => setTimeout(r, 1200));
+      // 監聽可見性：若頁面在短時間變為 hidden，代表已切至原生
+      let leftPage = false;
+      const onVis = ()=>{
+        if (document.visibilityState === 'hidden') { leftPage = true; }
+      };
+      document.addEventListener('visibilitychange', onVis, { once: true });
+      // 最多等待 1800ms，盡量讓 TWA 有時間切換
+      await new Promise(r => setTimeout(r, 1800));
+      document.removeEventListener('visibilitychange', onVis);
+      if (leftPage) { console.debug('已離開至原生 Rewarded'); /* 回原生流程 */ }
+      else { console.debug('仍留在頁面，回退到 GPT Rewarded'); }
       // 若使用者已離開去看原生廣告，這段不會執行；否則繼續走 GPT 流程
     }
 
@@ -149,7 +159,11 @@ function playRewardedAd(){
       };
 
       try {
-        const adUnit = (window.GPT_REWARDED_AD_UNIT || '/21800000000/homeletter_rewarded');
+        const adUnitDefault = '/21800000000/homeletter_rewarded';
+        const adUnit = (window.GPT_REWARDED_AD_UNIT || adUnitDefault);
+        if (adUnit === adUnitDefault) {
+          console.warn('GPT Rewarded 使用預設路徑，請在 config.js 設定正式 AD_UNIT');
+        }
         const slot = googletag.defineOutOfPageSlot(
           adUnit,
           googletag.enums.OutOfPageFormat.REWARDED
