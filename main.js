@@ -212,6 +212,11 @@ function initBottomBanner(){
         const slot = window.ADSENSE_SLOT || ins.getAttribute('data-ad-slot');
         if (client) ins.setAttribute('data-ad-client', client);
         if (slot) ins.setAttribute('data-ad-slot', slot);
+        // 若啟用 AdSense 測試模式，強制顯示測試廣告（不計入收益）
+        if (window.ADSENSE_TEST_MODE) {
+          try { ins.setAttribute('data-adtest', 'on'); } catch{}
+          console.debug('AdSense test mode: data-adtest=on');
+        }
       }
       if (window.adsbygoogle) {
         try {
