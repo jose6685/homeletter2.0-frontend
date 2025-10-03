@@ -19,6 +19,6 @@ window.ADSENSE_SLOT = window.ADSENSE_SLOT || '8178860305';
 // 將於 main.js 中自動為 <ins class="adsbygoogle"> 加上 data-adtest="on"。
 window.ADSENSE_TEST_MODE = true;
 
-// SAFE MODE：正式部署改為關閉，避免使用相對路徑造成誤呼叫前端域名下的 /api。
-// 若需本地預覽安全模式，請改用 config.safe.js 與批次檔切換。
-window.SAFE_MODE = false;
+// 不發行 Web 版：前端停用廣告與付費 API，以 Android 原生為主。
+// 若需重啟 Web 廣告，請改用 config.live.js 或 enable_ads.bat。
+window.SAFE_MODE = true;
