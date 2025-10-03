@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "org.homeletter.app",
+      "sha256_cert_fingerprints": [
+        "CE:21:14:5D:E2:5C:4D:6D:7C:CF:8F:62:93:14:70:BB:AE:07:EA:D4:7F:2D:7E:D0:08:37:93:63:D5:E8:D3:A3"
+      ]
+    }
+  }
+]
