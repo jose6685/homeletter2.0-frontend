@@ -141,7 +141,7 @@ function apiFetch(path, options){
     }
     return Promise.resolve({ json: async ()=> ({ ok:true }) });
   }
-  const { timeoutMs = 20000, ...rest } = options || {};
+  const { timeoutMs = 30000, ...rest } = options || {};
   const controller = new AbortController();
   const timer = setTimeout(()=> controller.abort(new Error('timeout')), timeoutMs);
   return fetch(url, { ...rest, signal: controller.signal })
@@ -152,10 +152,10 @@ function apiFetch(path, options){
 function sleep(ms){ return new Promise(r=> setTimeout(r, ms)); }
 async function fetchWithRetry(path, options, retryOptions){
   const {
-    maxRetries = 2,
-    initialDelayMs = 1000,
+    maxRetries = 3,
+    initialDelayMs = 1500,
     backoff = 2,
-    timeoutMs = 15000,
+    timeoutMs = 30000,
     onAttempt
   } = retryOptions || {};
 
@@ -305,10 +305,10 @@ async function generate(topic){
       headers:{"Content-Type":"application/json","Accept":"application/json"},
       body: JSON.stringify({ topic })
     },{
-      maxRetries: 2,
-      initialDelayMs: 1000,
+      maxRetries: 3,
+      initialDelayMs: 1500,
       backoff: 2,
-      timeoutMs: 15000,
+      timeoutMs: 30000,
       onAttempt: (n)=> setNotice(n===1 ? '正在喚醒服務…' : `正在喚醒服務…（第 ${n} 次重試）`)
     });
     const ct = (res.headers && res.headers.get && res.headers.get('content-type')) || '';
@@ -387,10 +387,10 @@ async function fetchGeneratedItem(topic){
     const res = await fetchWithRetry('/api/generate',{
       method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body: JSON.stringify({ topic })
     },{
-      maxRetries: 2,
-      initialDelayMs: 1000,
+      maxRetries: 3,
+      initialDelayMs: 1500,
       backoff: 2,
-      timeoutMs: 15000,
+      timeoutMs: 30000,
       onAttempt: (n)=> setNotice(n===1 ? '正在喚醒服務…' : `正在喚醒服務…（第 ${n} 次重試）`)
     });
     const ct = (res.headers && res.headers.get && res.headers.get('content-type')) || '';
@@ -766,4 +766,13 @@ function initBackground(){
 
 // 啟動背景場景
 initBackground();
+// 啟動時預熱後端（降低 Render 冷啟動造成的逾時）
+(function prewarmBackend(){
+  try {
+    // 使用較長逾時以容忍冷啟動；背景嘗試，不影響 UI
+    apiFetch('/healthz', { method: 'GET', timeoutMs: 30000 })
+      .then(()=>{ /* 成功預熱 */ })
+      .catch(()=>{ /* 預熱失敗忽略，生成時仍會重試 */ });
+  } catch {}
+})();
 // 已移除：底部橫幅初始化呼叫
