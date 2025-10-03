@@ -10,18 +10,5 @@
     }
   ],
   "rewrites": [],
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "has": [{ "type": "host", "value": "homeletter2-0-frontend.vercel.app" }],
-      "destination": "https://frontend-jose6685-6249s-projects.vercel.app/$1",
-      "statusCode": 308
-    },
-    {
-      "source": "/(.*)",
-      "has": [{ "type": "host", "value": "homeletter2-0-frontend-jose6685-6249s-projects.vercel.app" }],
-      "destination": "https://frontend-jose6685-6249s-projects.vercel.app/$1",
-      "statusCode": 308
-    }
-  ]
+  "redirects": []
 }
