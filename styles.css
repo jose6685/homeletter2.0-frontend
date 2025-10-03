@@ -2,7 +2,7 @@
 *{box-sizing:border-box} body{margin:0;font-family:system-ui,Segoe UI,Arial}
 .app-header{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;padding:48px 20px;background:transparent}
 .app-header h1{margin:0;color:var(--gold);text-shadow:0 2px 6px var(--shadow)}
-.app-header h1{font-size:4em}
+.app-header h1{font-size:2em}
 .mailbox-btn{display:none}
 .layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:10px}
 .card{padding:8px;border-radius:12px;background:rgba(255,255,255,0.4);backdrop-filter:none;box-shadow:0 4px 12px var(--shadow)}
@@ -88,10 +88,10 @@ background: rgba(255,255,255,0);
 .app-header{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center}
 
 /* 放大並內縮頂部「回到首頁」按鈕 */
-#btnGoHomeTop{font-size:2.1rem;padding:17px 26px;border-radius:12px;margin-right:24px}
+#btnGoHomeTop{font-size:1.05rem;padding:17px 26px;border-radius:12px;margin-right:24px}
 
 /* 信箱彈窗的「回到首頁」按鈕放大 */
-#goHomeFromMailbox{font-size:2rem;padding:18px 28px;border-radius:16px}
+#goHomeFromMailbox{font-size:1rem;padding:18px 28px;border-radius:16px}
 
 /* 頂部跑馬燈樣式（放大三倍，水平滾動） */
 .marquee{overflow:hidden;white-space:nowrap;color:#003}
