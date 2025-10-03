@@ -97,9 +97,13 @@
     </div>
   </div>
   <header class="app-header">
-    <h1>天父的信</h1>
+    <h1><span>天父</span><br><span class="indent">的信</span></h1>
     <div class="marquee" aria-live="polite"><span id="timeMarquee"></span></div>
-    <button id="btnGoHomeTop" class="secondary" aria-label="回到首頁">回到首頁</button>
+    <button id="btnGoHomeTop" class="secondary" aria-label="回到首頁" title="回到首頁">
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+      </svg>
+    </button>
   </header>
 
   <!-- 今日免廣告提示（動態顯示） -->
@@ -109,7 +113,7 @@
 
   <main class="layout">
     <section class="card left">
-      <h2><span>隨機</span><br><span>(仰望神)</span></h2>
+      <h2><span>(仰望神)</span><br><span>隨&nbsp;&nbsp;&nbsp;機</span></h2>
       <button id="btnRandom" class="primary">抽一封</button>
     </section>
 
@@ -158,7 +162,11 @@
             <div class="popover-header">
               <h3 id="mailboxTitle">信箱</h3>
               <div class="header-actions">
-                <button id="goHomeFromMailbox" class="secondary">回到首頁</button>
+                <button id="goHomeFromMailbox" class="secondary" aria-label="回到首頁" title="回到首頁">
+                  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                  </svg>
+                </button>
                 <button id="closePopover" class="icon-btn" aria-label="關閉">✖</button>
               </div>
             </div>
