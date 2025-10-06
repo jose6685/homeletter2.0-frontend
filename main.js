@@ -424,6 +424,8 @@ async function attemptDraw(type, topic){
   const item = await fetchGeneratedItem(topic);
   showLoading(false);
   displayCard(item);
+  // 修正：抽卡流程同樣保存到信箱，避免只顯示舊信
+  try { await saveToMailbox(item); } catch {}
   setNotice('');
   incDrawCount(type);
 }
@@ -617,7 +619,8 @@ function getSpeakText(){
 function startSpeak(){
   const synth = window.speechSynthesis;
   if(!synth){ alert('此瀏覽器不支援語音朗讀'); return; }
-  if(synth.paused){ synth.resume(); updateSpeakButton(); return; }
+  // 若為暫停狀態，先嘗試恢復，但不中斷後續播放邏輯
+  if(synth.paused){ try { synth.resume(); } catch{} }
   const text = getSpeakText();
   try { synth.cancel(); } catch{}
   const utter = new SpeechSynthesisUtterance(text);

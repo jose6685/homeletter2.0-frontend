@@ -1,14 +1,8 @@
-{
+﻿{
   "headers": [
-    {
-      "source": "/(main|config).js",
-      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
-    },
-    {
-      "source": "/index.html",
-      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
-    }
+    { "source": "/(main.js|config.js|index.html)", "headers": [{"key":"Cache-Control","value":"no-cache"}] }
   ],
-  "rewrites": [],
-  "redirects": []
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://homeletter2-0-backend.onrender.com/api/$1" }
+  ]
 }
