@@ -13,7 +13,6 @@
   <!-- Lottie Web CDN -->
   <!-- 已移除 Lottie CDN：避免因外網阻斷造成載入錯誤
        若需動畫，請改用本地檔案（例如 frontend/lib/lottie.min.js），或在部署環境允許 CDN 後再開啟。 -->
-  <!-- 已移除：廣告相關腳本（GPT / AdSense） -->
 </head>
 <body>
   <!-- Layered background scene per PRD 5.2 -->
@@ -104,8 +103,7 @@
     </button>
   </header>
 
-  <!-- 今日免廣告提示（動態顯示） -->
-  <div id="adNotice" class="notice hidden" role="status" aria-live="polite"></div>
+  
 
   
 
@@ -130,7 +128,11 @@
     <article id="letter" class="letter">
       <div class="letter-controls">
         <div id="clock" class="clock" aria-label="現在時間"></div>
-        <button id="btnSpeakToggle" class="speak-toggle" aria-label="播放或暫停朗讀">播放</button>
+        <button id="btnSpeakToggle" class="speak-toggle" aria-label="播放或暫停朗讀">
+          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="currentColor" d="M8 5v14l11-7z"/>
+          </svg>
+        </button>
       </div>
       <div id="letterContent" class="letter-content">
         <div id="letterBody" class="letter-body">
@@ -139,10 +141,8 @@
         <div class="letter-actions">
           <button id="btnSave" class="secondary">保存卡片</button>
           <button id="btnShare" class="secondary">分享</button>
-          <button id="btnShareLine" class="secondary">LINE 分享</button>
-          <button id="btnShareFacebook" class="secondary">Facebook 分享</button>
-          <button id="btnOpenMailbox" class="secondary">打開信箱</button>
-          <!-- 已移除：底部廣告橫幅 -->
+          <button id="btnOpenMailbox" class="secondary">回顧天父的信</button>
+          
         </div>
       </div>
       <div class="letter-sidebar">

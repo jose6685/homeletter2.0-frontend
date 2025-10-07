@@ -34,7 +34,6 @@ const prevPageBtn = document.getElementById("prevPage");
 const nextPageBtn = document.getElementById("nextPage");
 const pageIndicator = document.getElementById("pageIndicator");
 const mailboxFooter = document.getElementById("mailboxFooter");
-const bottomAdBanner = document.getElementById("bottomAdBanner");
 
 let lottieAnim = null;
 let lastGenerated = null;
@@ -42,9 +41,8 @@ let mailboxCache = [];
 let mailboxPage = 1;
 const MAILBOX_PAGE_SIZE = 6;
 
-// --- 廣告門檻：每日各一次免廣告（隨機 / 主題） + 累積次數記錄 ---
-const DRAW_KEYS = { random: 'homeletter_draw_random', topic: 'homeletter_draw_topic' }; // 累積次數（非門檻）
-const FREE_KEYS = { random: 'homeletter_free_random_date', topic: 'homeletter_free_topic_date' }; // 當日是否已用免廣告
+// --- 使用次數記錄（保留）：僅統計抽卡次數，不涉及任何廣告 ---
+const DRAW_KEYS = { random: 'homeletter_draw_random', topic: 'homeletter_draw_topic' };
 function getDrawCount(type){
   const v = parseInt(localStorage.getItem(DRAW_KEYS[type])||'0',10);
   return Number.isFinite(v) ? v : 0;
@@ -61,15 +59,6 @@ function todayStr(){
   const dd = String(d.getDate()).padStart(2,'0');
   return `${y}-${m}-${dd}`;
 }
-function isFreeToday(type){
-  const k = FREE_KEYS[type];
-  const v = localStorage.getItem(k) || '';
-  return v !== todayStr();
-}
-function consumeFree(type){
-  const k = FREE_KEYS[type];
-  localStorage.setItem(k, todayStr());
-}
 
 function setNotice(msg){
   if (!adNotice) return;
@@ -82,29 +71,7 @@ function setNotice(msg){
   }
 }
 
-// GPT Rewarded 初始化與播放（修正 API 調用，使用 OutOfPageSlot REWARDED）
-let gptInitialized = false;
-function initGPT(){
-  return new Promise((resolve)=>{
-    window.googletag = window.googletag || { cmd: [] };
-    googletag.cmd.push(function(){
-      if (!gptInitialized){
-        try { googletag.pubads().enableSingleRequest(); } catch{}
-        try { googletag.enableServices(); } catch{}
-        gptInitialized = true;
-      }
-      resolve();
-    });
-  });
-}
-
-function playRewardedAd(){
-  // 廣告與獎勵規則已取消：直接授予，無任何廣告流程
-  return Promise.resolve(true);
-}
-
-// AdSense 底部橫幅初始化（Option B）
-// 已移除：AdSense 底部橫幅初始化
+ 
 
 // 部署策略：固定使用後端 API_BASE（由 config.js 提供），不再依賴前端域名下的 /api 重寫
 const API_BASE = window.API_BASE;
@@ -380,7 +347,6 @@ async function generate(topic){
   } finally { showLoading(false); setNotice(''); }
 }
 
-// 僅取得生成資料，不立即渲染（用於 Rewarded 門檻）
 async function fetchGeneratedItem(topic){
   showLoading(true);
   try{
@@ -419,7 +385,6 @@ async function fetchGeneratedItem(topic){
   }
 }
 
-// 抽卡：已取消廣告與獎勵門檻，直接生成並顯示
 async function attemptDraw(type, topic){
   const item = await fetchGeneratedItem(topic);
   showLoading(false);
@@ -655,7 +620,11 @@ function updateSpeakButton(){
   if(!btnSpeakToggle) return;
   const isPaused = !!(synth && synth.paused);
   const isSpeaking = !!(synth && synth.speaking);
-  btnSpeakToggle.textContent = (isSpeaking && !isPaused) ? '暫停' : '播放';
+  const iconSvg = (isSpeaking && !isPaused)
+    ? '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
+    : '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>';
+  btnSpeakToggle.innerHTML = iconSvg;
+  btnSpeakToggle.setAttribute('aria-label', (isSpeaking && !isPaused) ? '暫停' : '播放');
 }
 
 // 綁定朗讀切換按鈕事件
