@@ -1,6 +1,6 @@
-﻿{
+{
   "headers": [
-    { "source": "/(main.js|config.js|index.html)", "headers": [{"key":"Cache-Control","value":"no-cache"}] }
+    { "source": "/(main.js|config.js|styles.css|index.html)", "headers": [{"key":"Cache-Control","value":"no-cache"}] }
   ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "https://homeletter2-0-backend.onrender.com/api/$1" }
