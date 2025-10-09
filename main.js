@@ -13,8 +13,7 @@ const letterContentEl = document.getElementById("letterContent");
 const letterBodyEl = document.getElementById("letterBody");
 const btnSave = document.getElementById("btnSave");
 const btnShare = document.getElementById("btnShare");
-const btnShareLine = document.getElementById("btnShareLine");
-const btnShareFacebook = document.getElementById("btnShareFacebook");
+// 已移除：LINE 與 Facebook 分享按鈕
 const btnSpeakToggle = document.getElementById("btnSpeakToggle");
 const btnOpenMailbox = document.getElementById("btnOpenMailbox");
 const metaEl = document.getElementById("meta");
@@ -663,19 +662,6 @@ async function shareCurrent(){
 }
 if (btnSave) btnSave.addEventListener('click', downloadCurrent);
 if (btnShare) btnShare.addEventListener('click', shareCurrent);
-async function shareLine(){
-  const content = composeShareText(lastGenerated);
-  const url = 'https://line.me/R/msg/text/?' + encodeURIComponent(content);
-  try { window.open(url, '_blank'); }
-  catch { try { await navigator.clipboard.writeText(content); alert('已複製，可貼到 LINE'); } catch { alert('分享失敗，請手動複製'); } }
-}
-function shareFacebook(){
-  const shareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(location.href);
-  try { window.open(shareUrl, '_blank'); }
-  catch { alert('無法開啟 Facebook 分享，請手動複製網址'); }
-}
-if (btnShareLine) btnShareLine.addEventListener('click', shareLine);
-if (btnShareFacebook) btnShareFacebook.addEventListener('click', shareFacebook);
 
 // 啟動
 initTopics();
